@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+package templates;
+option go_package="templatespb";
+
+service TemplatesService{}

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/joho/godotenv"
 
-	"context"
 	"flag"
 	"fmt"
 
@@ -13,9 +12,12 @@ import (
 
 	"github.com/go-kit/kit/log/level"
 
+	"net"
 	"net/http"
 
+	"github.com/ncostamagna/axul_template/templatespb"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"google.golang.org/grpc"
 
 	"os"
 	"os/signal"
@@ -23,9 +25,9 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/ncostamagna/axul_contact/contacts"
-	"github.com/ncostamagna/streetflow/slack"
 )
+
+type server struct{}
 
 func main() {
 
@@ -71,19 +73,19 @@ func main() {
 	if os.Getenv("DATABASE_DEBUG") == "true" {
 		db = db.Debug()
 	}
-
-	db.AutoMigrate(contacts.Contact{})
+	/*
+		db.AutoMigrate(contacts.Contact{}) */
 
 	flag.Parse()
-	ctx := context.Background()
-
-	var srv contacts.Service
-	{
-		slackTran, _ := slack.NewSlackBuilder("birthday", "xoxb-1448869030753-1436532267283-AZoMMLoxODNMC5xydelq1uLP").Build()
-		repository := contacts.NewRepo(db, logger)
-		srv = contacts.NewService(repository, *slackTran, logger)
-	}
-
+	/* 	ctx := context.Background()
+	 */
+	/* 	var srv contacts.Service
+	   	{
+	   		slackTran, _ := slack.NewSlackBuilder("birthday", "xoxb-1448869030753-1436532267283-AZoMMLoxODNMC5xydelq1uLP").Build()
+	   		repository := contacts.NewRepo(db, logger)
+	   		srv = contacts.NewService(repository, *slackTran, logger)
+	   	}
+	*/
 	errs := make(chan error)
 
 	go func() {
@@ -94,10 +96,27 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/contacts/", contacts.NewHTTPServer(ctx, contacts.MakeEndpoints(srv)))
-
+	/* 	mux.Handle("/contacts/", contacts.NewHTTPServer(ctx, contacts.MakeEndpoints(srv)))
+	 */
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
+
+	fmt.Println("Hello world")
+
+	// 50051 puerto por defecto de gRPC
+	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	if err != nil {
+		fmt.Println("Failed to listen: %v", err)
+	}
+
+	// New server
+	s := grpc.NewServer()
+	// le pasamos el struct server que definimos
+	templatespb.RegisterTemplatesServiceServer(s, &server{})
+
+	if err := s.Serve(lis); err != nil {
+		fmt.Println("failed to serve: %v", err)
+	}
 
 	go func() {
 		fmt.Println("listening on port", *httpAddr)
