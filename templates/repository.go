@@ -1,8 +1,7 @@
-package contacts
+package templates
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -23,11 +22,11 @@ func NewRepo(db *gorm.DB, logger log.Logger) Repository {
 	}
 }
 
-func (repo *repo) Create(ctx context.Context, contact *Contact) error {
+func (repo *repo) Create(ctx context.Context, template *Template) error {
 
 	logger := log.With(repo.logger, "method", "Create")
 
-	result := repo.db.Create(&contact)
+	result := repo.db.Create(&template)
 
 	if result.Error != nil {
 		_ = level.Error(logger).Log("err", result.Error)
@@ -35,16 +34,16 @@ func (repo *repo) Create(ctx context.Context, contact *Contact) error {
 	}
 
 	_ = logger.Log("RowAffected", result.RowsAffected)
-	_ = logger.Log("ID", contact.ID)
+	_ = logger.Log("ID", template.ID)
 
 	return nil
 }
 
-func (repo *repo) GetAll(ctx context.Context, contact *[]Contact) error {
+func (repo *repo) GetAll(ctx context.Context, templates *[]Template) error {
 
 	logger := log.With(repo.logger, "method", "GetAll")
 
-	result := repo.db.Find(&contact)
+	result := repo.db.Find(&templates)
 
 	if result.Error != nil {
 		_ = level.Error(logger).Log("err", result.Error)
@@ -56,25 +55,17 @@ func (repo *repo) GetAll(ctx context.Context, contact *[]Contact) error {
 	return nil
 }
 
-func (repo *repo) Get(ctx context.Context, contact *Contact, id uint) error {
+func (repo *repo) Get(ctx context.Context, template *Template, id uint) error {
 
 	return nil
 }
 
-func (repo *repo) GetByBirthdayRange(ctx context.Context, contacts *[]Contact, days int) error {
-
-	date := time.Now().AddDate(0, 0, -1*days)
-	day, month := date.Day(), int(date.Month())
-	repo.db.Where("month(birthday) = ? and day(birthday) = ?", month, day).Find(&contacts)
-	return nil
-}
-
-func (repo *repo) Update(ctx context.Context, contact *Contact, contactValues Contact) error {
+func (repo *repo) Update(ctx context.Context, template *Template, templateValues Template) error {
 
 	return nil
 }
 
-func (repo *repo) Delete(ctx context.Context, contact *[]Contact) error {
+func (repo *repo) Delete(ctx context.Context, template *Template, id uint) error {
 
 	return nil
 }

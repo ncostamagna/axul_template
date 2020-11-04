@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/joho/godotenv"
 
 	"flag"
@@ -15,6 +17,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/ncostamagna/axul_template/templates"
 	"github.com/ncostamagna/axul_template/templatespb"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -73,19 +76,18 @@ func main() {
 	if os.Getenv("DATABASE_DEBUG") == "true" {
 		db = db.Debug()
 	}
-	/*
-		db.AutoMigrate(contacts.Contact{}) */
+
+	db.AutoMigrate(templates.Template{})
 
 	flag.Parse()
-	/* 	ctx := context.Background()
-	 */
-	/* 	var srv contacts.Service
-	   	{
-	   		slackTran, _ := slack.NewSlackBuilder("birthday", "xoxb-1448869030753-1436532267283-AZoMMLoxODNMC5xydelq1uLP").Build()
-	   		repository := contacts.NewRepo(db, logger)
-	   		srv = contacts.NewService(repository, *slackTran, logger)
-	   	}
-	*/
+	ctx := context.Background()
+
+	var srv templates.Service
+	{
+		repository := templates.NewRepo(db, logger)
+		srv = templates.NewService(repository, logger)
+	}
+
 	errs := make(chan error)
 
 	go func() {
@@ -96,8 +98,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	/* 	mux.Handle("/contacts/", contacts.NewHTTPServer(ctx, contacts.MakeEndpoints(srv)))
-	 */
+	mux.Handle("/templates/", templates.NewHTTPServer(ctx, templates.MakeEndpoints(srv)))
+
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
@@ -114,9 +116,12 @@ func main() {
 	// le pasamos el struct server que definimos
 	templatespb.RegisterTemplatesServiceServer(s, &server{})
 
-	if err := s.Serve(lis); err != nil {
-		fmt.Println("failed to serve: %v", err)
-	}
+	go func() {
+
+		fmt.Println("listening on port:50051")
+		errs <- s.Serve(lis)
+
+	}()
 
 	go func() {
 		fmt.Println("listening on port", *httpAddr)
