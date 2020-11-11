@@ -28,7 +28,7 @@ func MakeEndpoints(s Service) Endpoints {
 
 func makeCreateEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(TemplateRequest)
+		req := request.(entityRequest)
 
 		t := Template{
 			Type:     req.Type,
@@ -71,6 +71,15 @@ func makeUpdateEndpoint(s Service) endpoint.Endpoint {
 
 func makeGetEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return nil, nil
+		req := request.(getRequest)
+		var templates Template
+		fmt.Println(req)
+
+		if rerr := s.Get(ctx, &templates, req.id); rerr != nil {
+			resp := response.NewResponse(rerr.Message(), rerr.Status(), "", nil)
+			return resp, nil
+		}
+
+		return response.NewResponse("Success", 200, "", templates), nil
 	}
 }

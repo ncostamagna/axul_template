@@ -3,7 +3,9 @@ package templates
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
@@ -11,15 +13,14 @@ import (
 )
 
 type (
-	TemplateRequest struct {
+	entityRequest struct {
 		ID       uint   `json:"id"`
 		Type     string `json:"type"`
 		Template string `json:"template"`
 	}
 
 	getRequest struct {
-		id       string
-		birthday string
+		id uint
 	}
 )
 
@@ -34,21 +35,21 @@ func NewHTTPServer(ctx context.Context, endpoints Endpoints) http.Handler {
 
 	r.Handle("/templates/", httptransport.NewServer(
 		endpoints.Create,
-		decodeCreateContact,
+		decodeCreate,
 		encodeResponse,
 		opts...,
 	)).Methods("POST")
 
 	r.Handle("/templates/", httptransport.NewServer(
 		endpoints.GetAll,
-		decodeGetContact,
+		decodeGet,
 		encodeResponse,
 		opts...,
 	)).Methods("GET")
 
 	r.Handle("/templates/{id}", httptransport.NewServer(
 		endpoints.Get,
-		nil,
+		decodeGet,
 		encodeResponse,
 		opts...,
 	)).Methods("GET")
@@ -62,7 +63,7 @@ func NewHTTPServer(ctx context.Context, endpoints Endpoints) http.Handler {
 
 	r.Handle("/templates/{id}", httptransport.NewServer(
 		nil,
-		decodeCreateContact,
+		decodeCreate,
 		encodeResponse,
 		opts...,
 	)).Methods("DELETE")
@@ -85,9 +86,9 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, resp interface{}
 	return json.NewEncoder(w).Encode(r)
 }
 
-func decodeCreateContact(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeCreate(ctx context.Context, r *http.Request) (interface{}, error) {
 
-	var req TemplateRequest
+	var req entityRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 
@@ -97,13 +98,25 @@ func decodeCreateContact(ctx context.Context, r *http.Request) (interface{}, err
 	return req, nil
 }
 
-func decodeGetContact(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeGet(ctx context.Context, r *http.Request) (interface{}, error) {
 
-	v := r.URL.Query()
+	vars := mux.Vars(r)
+	idVar, ok := vars["id"]
+	req := getRequest{}
 
-	req := getRequest{
-		birthday: v.Get("birthday"),
+	if !ok {
+		return req, nil
 	}
+
+	id, err := strconv.Atoi(idVar)
+	if err != nil {
+		return nil, err
+	}
+	if id == 0 {
+		return nil, errors.New("Invalid id")
+	}
+
+	req.id = uint(id)
 	return req, nil
 }
 

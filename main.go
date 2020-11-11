@@ -106,7 +106,7 @@ func main() {
 	fmt.Println("Hello world")
 
 	// 50051 puerto por defecto de gRPC
-	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	lis, err := net.Listen("tcp", "0.0.0.0:50055")
 	if err != nil {
 		fmt.Println("Failed to listen: %v", err)
 	}

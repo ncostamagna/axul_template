@@ -57,6 +57,17 @@ func (repo *repo) GetAll(ctx context.Context, templates *[]Template) error {
 
 func (repo *repo) Get(ctx context.Context, template *Template, id uint) error {
 
+	logger := log.With(repo.logger, "method", "GetAll")
+
+	//result := repo.db.Find(&templates)
+	result := repo.db.Find(&template, &Template{ID: id})
+	if result.Error != nil {
+		_ = level.Error(logger).Log("err", result.Error)
+		return result.Error
+	}
+
+	_ = logger.Log("RowAffected", result.RowsAffected)
+
 	return nil
 }
 

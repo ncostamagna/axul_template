@@ -53,11 +53,13 @@ func (s service) Delete(ctx context.Context) (*Template, rerrors.RestErr) {
 	return &template, nil
 }
 
-func (s service) Get(ctx context.Context) (Template, rerrors.RestErr) {
+func (s service) Get(ctx context.Context, template *Template, id uint) rerrors.RestErr {
 
-	template := Template{}
+	if err := s.repo.Get(ctx, template, id); err != nil {
+		return rerrors.NewNotFoundError(err)
+	}
 
-	return template, nil
+	return nil
 }
 
 func (s service) GetAll(ctx context.Context, templates *[]Template) rerrors.RestErr {

@@ -31,6 +31,6 @@ type Repository interface {
 type Service interface {
 	Create(ctx context.Context, template *Template) rerrors.RestErr
 	Update(ctx context.Context) (*Template, rerrors.RestErr)
-	Get(ctx context.Context) (Template, rerrors.RestErr)
+	Get(ctx context.Context, template *Template, id uint) rerrors.RestErr
 	GetAll(ctx context.Context, templates *[]Template) rerrors.RestErr
 }
