@@ -17,14 +17,15 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/ncostamagna/axul_template/templates"
-	"github.com/ncostamagna/axul_template/templatespb"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"google.golang.org/grpc"
-
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/ncostamagna/axul_template/templates"
+	pb "github.com/ncostamagna/axul_template/templatespb"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -103,24 +104,23 @@ func main() {
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
-	fmt.Println("Hello world")
+	grpcServer := templates.NewGRPCServer(ctx, templates.MakeEndpoints(srv))
 
-	// 50051 puerto por defecto de gRPC
-	lis, err := net.Listen("tcp", "0.0.0.0:50055")
+	grpcListener, err := net.Listen("tcp", ":50055")
 	if err != nil {
-		fmt.Println("Failed to listen: %v", err)
+		logger.Log("transport", "gRPC", "during", "Listen", "err", err)
+		os.Exit(1)
 	}
 
-	// New server
-	s := grpc.NewServer()
-	// le pasamos el struct server que definimos
-	templatespb.RegisterTemplatesServiceServer(s, &server{})
-
 	go func() {
+		level.Info(logger).Log("transport", "GRPC", "addr", ":50055")
+		baseServer := grpc.NewServer()
+		fmt.Println("listening on port:50055")
+		pb.RegisterTemplatesServiceServer(baseServer, grpcServer)
 
-		fmt.Println("listening on port:50051")
-		errs <- s.Serve(lis)
+		reflection.Register(baseServer)
 
+		baseServer.Serve(grpcListener)
 	}()
 
 	go func() {

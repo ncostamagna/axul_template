@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	gt "github.com/go-kit/kit/transport/grpc"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	pb "github.com/ncostamagna/axul_template/templatespb"
 	"github.com/ncostamagna/response"
 )
 
@@ -125,4 +127,50 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	resp := response.NewResponse(err.Error(), 500, "", nil)
 	w.WriteHeader(resp.GetStatusCode())
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+type gRPCServer struct {
+	getTemplate gt.Handler
+}
+
+// NewGRPCServer makes a set of endpoints available as a gRPC StatsServiceServer.
+func NewGRPCServer(ctx context.Context, endpoints Endpoints) pb.TemplatesServiceServer {
+	return &gRPCServer{
+		getTemplate: gt.NewServer(
+			endpoints.Get,
+			decodeGetRequest,
+			encodeGetResponse,
+		),
+	}
+}
+
+func (s *gRPCServer) GetTemplate(ctx context.Context, req *pb.TemplateRequest) (*pb.Template, error) {
+	_, resp, err := s.getTemplate.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.Template), nil
+}
+
+func decodeGetRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.TemplateRequest)
+	return getRequest{id: uint(req.Id)}, nil
+}
+
+func encodeGetResponse(_ context.Context, resp interface{}) (interface{}, error) {
+	r := resp.(response.Response)
+	d := r.GetData()
+
+	if d == nil {
+		return nil, errors.New("Entity doesn't exists")
+	}
+
+	entity := d.(Template)
+	template := &pb.Template{
+		ID:       uint32(entity.ID),
+		Type:     entity.Type,
+		Template: entity.Template,
+	}
+
+	return template, nil
 }

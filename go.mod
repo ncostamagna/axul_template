@@ -10,7 +10,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.8.0
 	github.com/ncostamagna/rerrors v0.0.1
-	github.com/ncostamagna/response v0.0.0-20201017043355-ac5dda050332
+	github.com/ncostamagna/response v0.0.0-20201111140444-e65fe9817e4f
 	github.com/ncostamagna/streetflow v0.0.0-20201018225034-e8f7c4cc2647
 	github.com/prometheus/client_golang v1.8.0
 	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect

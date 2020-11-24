@@ -210,6 +210,8 @@ github.com/ncostamagna/rerrors v0.0.1 h1:iTiEd2Z4fEO5LDO0ZqtD+bQZFifziWFmiAd9/2+
 github.com/ncostamagna/rerrors v0.0.1/go.mod h1:65MYSOONyd4XhaiK+kJzLR2+sL9UUbtH1wNBHh24ecY=
 github.com/ncostamagna/response v0.0.0-20201017043355-ac5dda050332 h1:Pt4ElVK0XdMd79hCtj7KVMfAWh8vr1JVN4YYOst9VsE=
 github.com/ncostamagna/response v0.0.0-20201017043355-ac5dda050332/go.mod h1:qqzElbCdl7zI+G8cYMRdxpJFGrCeSdQ0zKNXEPV76yw=
+github.com/ncostamagna/response v0.0.0-20201111140444-e65fe9817e4f h1:c4Mqj1T5mgkWQfkw7bggzhGd7HaTig/uwrtjLn1R3+I=
+github.com/ncostamagna/response v0.0.0-20201111140444-e65fe9817e4f/go.mod h1:qqzElbCdl7zI+G8cYMRdxpJFGrCeSdQ0zKNXEPV76yw=
 github.com/ncostamagna/streetflow v0.0.0-20201018225034-e8f7c4cc2647 h1:t2EFr23m4fzKgGbajvNEzF6U9EpirmZy1i6c4Dp87bs=
 github.com/ncostamagna/streetflow v0.0.0-20201018225034-e8f7c4cc2647/go.mod h1:rwDl7CqYZskxLMRuPkoRPFEU9DY1bdG3bxft40hZt+8=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
