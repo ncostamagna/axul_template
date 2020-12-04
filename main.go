@@ -86,7 +86,7 @@ func main() {
 	var srv templates.Service
 	{
 		repository := templates.NewRepo(db, logger)
-		srv = templates.NewService(repository, logger)
+		srv = templates.NewService(repository, nil, logger)
 	}
 
 	errs := make(chan error)

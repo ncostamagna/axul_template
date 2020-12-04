@@ -13,17 +13,18 @@ import (
 
 type service struct {
 	repo      Repository
-	slackTran slack.SlackBuilder
+	slackTran *slack.SlackBuilder
 	logger    log.Logger
 }
 
 type updateCb func(uint, time.Time) error
 
 //NewService is a service handler
-func NewService(repo Repository, logger log.Logger) Service {
+func NewService(repo Repository, slack *slack.SlackBuilder, logger log.Logger) Service {
 	return &service{
-		repo:   repo,
-		logger: logger,
+		repo:      repo,
+		slackTran: slack,
+		logger:    logger,
 	}
 }
 

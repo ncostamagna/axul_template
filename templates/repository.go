@@ -72,11 +72,11 @@ func (repo *repo) Get(ctx context.Context, template *Template, id uint) error {
 }
 
 func (repo *repo) Update(ctx context.Context, template *Template, templateValues Template) error {
-
+	// TODO
 	return nil
 }
 
 func (repo *repo) Delete(ctx context.Context, template *Template, id uint) error {
-
+	// TODO
 	return nil
 }
